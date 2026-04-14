@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { connect } from 'react-redux';
 import { getConfig } from '@edx/frontend-platform';
+import { Hyperlink } from '@openedx/paragon';
 
 import classNames from 'classnames';
 import CertificateCard from './CertificateCard';
@@ -13,33 +14,10 @@ const Certificates = ({ certificates }) => {
   const isTabletView = useIsOnTabletScreen();
   return (
     <div>
-      <div className="col justify-content-start align-items-start g-5rem p-0">
-        <div className="col align-self-stretch height-42px justify-content-start align-items-start p-0">
-          <p className="font-weight-bold text-primary-500 m-0 h2">
-            <FormattedMessage
-              id="profile.your.certificates"
-              defaultMessage="Your certificates"
-              description="heading for the certificates section"
-            />
-          </p>
-        </div>
-        <div className="col justify-content-start align-items-start pt-2 p-0">
-          <p className="font-weight-normal text-gray-800 m-0 p-0 p">
-            <FormattedMessage
-              id="profile.certificates.description"
-              defaultMessage="Your learner records information is only visible to you. Only your username and profile image are visible to others on {siteName}."
-              description="description of the certificates section"
-              values={{
-                siteName: getConfig().SITE_NAME,
-              }}
-            />
-          </p>
-        </div>
-      </div>
       {certificates?.length > 0 ? (
         <div className="col">
           <div className={classNames(
-            'row align-items-center pt-5 g-3rem',
+            'row align-items-center g-3rem',
             { 'justify-content-center': isTabletView },
           )}
           >
@@ -58,12 +36,37 @@ const Certificates = ({ certificates }) => {
           </div>
         </div>
       ) : (
-        <div className="pt-5">
-          <FormattedMessage
-            id="profile.no.certificates"
-            defaultMessage="You don't have any certificates yet."
-            description="displays when user has no course completion certificates"
-          />
+        <div className="pt-2">
+          <div className="profile-page__certificate-empty">
+            <div className="profile-page__certificate-empty-icon" aria-hidden="true">
+              <span className="profile-page__certificate-empty-medal">◌</span>
+            </div>
+            <h3 className="profile-page__certificate-empty-title">
+              <FormattedMessage
+                id="profile.no.certificates.title"
+                defaultMessage="No certificates earned yet"
+                description="Empty state title when user has no certificates"
+              />
+            </h3>
+            <p className="profile-page__certificate-empty-copy">
+              <FormattedMessage
+                id="profile.no.certificates.description"
+                defaultMessage="Your diplomas and completion certificates will appear here automatically when you complete your courses."
+                description="Empty state description when user has no certificates"
+              />
+            </p>
+            <Hyperlink
+              destination={`${getConfig().LMS_BASE_URL || ''}/dashboard`}
+              className="btn btn-primary profile-page__certificate-empty-action"
+              showLaunchIcon={false}
+            >
+              <FormattedMessage
+                id="profile.no.certificates.action"
+                defaultMessage="Explore the catalog"
+                description="CTA for certificate empty state"
+              />
+            </Hyperlink>
+          </div>
         </div>
       )}
     </div>

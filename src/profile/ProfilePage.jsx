@@ -9,10 +9,7 @@ import { sendTrackingLogEvent } from '@edx/frontend-platform/analytics';
 import { ensureConfig } from '@edx/frontend-platform';
 import { AppContext } from '@edx/frontend-platform/react';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import {
-  Alert, Hyperlink, OverlayTrigger, Tooltip,
-} from '@openedx/paragon';
-import { InfoOutline } from '@openedx/paragon/icons';
+import { Alert, Hyperlink } from '@openedx/paragon';
 import classNames from 'classnames';
 
 import {
@@ -78,6 +75,11 @@ const ProfilePage = ({ params }) => {
   const [viewMyRecordsUrl, setViewMyRecordsUrl] = useState(null);
   const isMobileView = useIsOnMobileScreen();
   const isTabletView = useIsOnTabletScreen();
+  const authenticatedUserName = context.authenticatedUser.username;
+  const isAuthenticatedUserProfile = () => params.username === authenticatedUserName;
+  const isBlockVisible = (blockInfo) => isAuthenticatedUserProfile()
+      || (!isAuthenticatedUserProfile() && Boolean(blockInfo));
+  const certificateCount = courseCertificates?.length || 0;
 
   useEffect(() => {
     const { CREDENTIALS_BASE_URL } = context.config;
@@ -96,8 +98,6 @@ const ProfilePage = ({ params }) => {
       navigate('/notfound');
     }
   }, [username, saveState, navigate]);
-
-  const authenticatedUserName = context.authenticatedUser.username;
 
   const handleSaveProfilePhoto = useCallback((formData) => {
     dispatch(saveProfilePhoto(authenticatedUserName, formData));
@@ -123,11 +123,6 @@ const ProfilePage = ({ params }) => {
     dispatch(updateDraft(fieldName, value));
   }, [dispatch]);
 
-  const isAuthenticatedUserProfile = () => params.username === authenticatedUserName;
-
-  const isBlockVisible = (blockInfo) => isAuthenticatedUserProfile()
-      || (!isAuthenticatedUserProfile() && Boolean(blockInfo));
-
   const renderViewMyRecordsButton = () => {
     if (!(viewMyRecordsUrl && isAuthenticatedUserProfile())) {
       return null;
@@ -136,8 +131,8 @@ const ProfilePage = ({ params }) => {
     return (
       <Hyperlink
         className={classNames(
-          'btn btn-brand bg-brand-500 font-weight-normal px-4 py-10px text-nowrap',
-          { 'w-100': isMobileView },
+          'profile-page__records-button btn text-nowrap',
+          { 'w-100': isMobileView || isTabletView },
         )}
         target="_blank"
         showLaunchIcon={false}
@@ -173,225 +168,190 @@ const ProfilePage = ({ params }) => {
         <PageLoading srMessage={intl.formatMessage(messages['profile.loading'])} />
       ) : (
         <>
-          <div
-            className={classNames(
-              'profile-page-bg-banner bg-primary d-md-block align-items-center h-100 w-100',
-              { 'px-3 py-4': isMobileView },
-              { 'px-120px py-5.5': !isMobileView },
-            )}
-          >
-            <div
-              className={classNames([
-                'col container-fluid w-100 h-100 bg-white py-0 rounded-75',
-                {
-                  'px-3': isMobileView,
-                  'px-40px': !isMobileView,
-                },
-              ])}
-            >
-              <div
-                className={classNames([
-                  'col h-100 w-100 px-0 justify-content-start g-15rem',
-                  {
-                    'py-4': isMobileView,
-                    'py-36px': !isMobileView,
-                  },
-                ])}
-              >
-                <div
-                  className={classNames([
-                    'row-auto d-flex flex-wrap align-items-center h-100 w-100 justify-content-start g-15rem',
-                    isMobileView || isTabletView ? 'flex-column' : 'flex-row',
-                  ])}
+          <section className="profile-page__hero">
+            <div className="profile-page__hero-shell">
+              <div className="profile-page__hero-card profile-page__hero-card--minimal">
+                <div className={classNames(
+                  'profile-page__hero-main',
+                  { 'profile-page__hero-main--stacked': isMobileView || isTabletView },
+                )}
                 >
-                  <ProfileAvatar
-                    className="col p-0"
-                    src={profileImage.src}
-                    isDefault={profileImage.isDefault}
-                    onSave={handleSaveProfilePhoto}
-                    onDelete={handleDeleteProfilePhoto}
-                    savePhotoState={savePhotoState}
-                    isEditable={isAuthenticatedUserProfile()}
-                  />
-                  <div
-                    className={classNames([
-                      'col h-100 w-100 m-0 p-0',
-                      isMobileView || isTabletView
-                        ? 'd-flex flex-column justify-content-center align-items-center'
-                        : 'justify-content-start align-items-start',
-                    ])}
-                  >
-                    <p className="row m-0 font-weight-bold text-truncate text-primary-500 h3">
-                      {params.username}
-                    </p>
-                    {isBlockVisible(name) && (
-                    <p className="row pt-2 text-gray-800 font-weight-normal m-0 p">
-                      {name}
-                    </p>
-                    )}
-                    <div className={classNames(
-                      'row pt-2 m-0',
-                      isMobileView
-                        ? 'd-flex justify-content-center align-items-center flex-column'
-                        : 'g-1rem',
-                    )}
-                    >
-                      <DateJoined date={dateJoined} />
-                      <UserCertificateSummary count={courseCertificates?.length || 0} />
-                    </div>
+                  <div className="profile-page__avatar-column">
+                    <ProfileAvatar
+                      src={profileImage.src}
+                      isDefault={profileImage.isDefault}
+                      onSave={handleSaveProfilePhoto}
+                      onDelete={handleDeleteProfilePhoto}
+                      savePhotoState={savePhotoState}
+                      isEditable={isAuthenticatedUserProfile()}
+                    />
                   </div>
-                  <div className={classNames([
-                    'p-0 ',
-                    isMobileView || isTabletView ? 'col d-flex justify-content-center' : 'col-auto',
-                  ])}
-                  >
+                  <div className="profile-page__hero-copy">
+                    <div className="profile-page__eyebrow">
+                      <DateJoined date={dateJoined} />
+                    </div>
+                    <h1 className="profile-page__display-name">
+                      {isBlockVisible(name) && name ? name : params.username}
+                    </h1>
+                    <p className="profile-page__username">@{params.username}</p>
+                    {certificateCount > 0 && (
+                      <div className="profile-page__meta-row">
+                        <span className="profile-page__meta-pill">
+                          <UserCertificateSummary count={certificateCount} />
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="profile-page__hero-utility">
                     {renderViewMyRecordsButton()}
                   </div>
                 </div>
-              </div>
-              <div className="ml-auto">
                 {renderPhotoUploadErrorMessage()}
               </div>
             </div>
-          </div>
-          <div
-            className={classNames([
-              'col d-inline-flex h-100 w-100 align-items-start justify-content-start g-3rem',
-              isMobileView ? 'py-4 px-3' : 'px-120px py-6',
-            ])}
-          >
-            <div className="w-100 p-0">
-              <div className="col justify-content-start align-items-start p-0">
-                <div className="col align-self-stretch height-42px justify-content-start align-items-start p-0">
-                  <p className="font-weight-bold text-primary-500 m-0 h2">
-                    {isMobileView ? (
+          </section>
+
+          <div className="profile-page__content-shell">
+            <div className="profile-page__body-grid">
+              <aside className="profile-page__rail">
+                <section className="profile-page__rail-card profile-page__rail-card--directory">
+                  <div className="profile-page__rail-header">
+                    <p className="profile-page__section-kicker mb-0">
                       <FormattedMessage
-                        id="profile.profile.information"
-                        defaultMessage="Profile"
-                        description="heading for the editable profile section in mobile view"
+                        id="profile.rail.public.kicker"
+                        defaultMessage="Public information"
+                        description="Kicker for the public information rail"
                       />
-                    )
-                      : (
-                        <FormattedMessage
-                          id="profile.profile.information"
-                          defaultMessage="Profile information"
-                          description="heading for the editable profile section"
-                        />
-                      )}
-                  </p>
-                </div>
-              </div>
-              <div
-                className={classNames([
-                  'row m-0 px-0 w-100 d-inline-flex align-items-start justify-content-start',
-                  isMobileView ? 'pt-4' : 'pt-5.5',
-                ])}
-              >
-                <div
-                  className={classNames([
-                    'col p-0',
-                    isMobileView ? 'col-12' : 'col-6',
-                  ])}
-                >
-                  <div className="m-0">
-                    <div className="row m-0 pb-1.5 align-items-center">
-                      <p data-hj-suppress className="h5 font-weight-bold m-0">
-                        {intl.formatMessage(messages['profile.username'])}
-                      </p>
-                      <OverlayTrigger
-                        key="top"
-                        placement="top"
-                        overlay={(
-                          <Tooltip variant="light" id="tooltip-top">
-                            <p className="h5 font-weight-normal m-0 p-0">
-                              {intl.formatMessage(messages['profile.username.tooltip'])}
-                            </p>
-                          </Tooltip>
-                          )}
-                      >
-                        <InfoOutline className="m-0 info-icon" />
-                      </OverlayTrigger>
-                    </div>
-                    <h4 className="edit-section-header text-gray-700">
-                      {params.username}
-                    </h4>
+                    </p>
                   </div>
-                  {isBlockVisible(name) && (
-                  <Name
-                    name={name}
-                    accountSettingsUrl={context.config.ACCOUNT_SETTINGS_URL}
-                    visibilityName={visibilityName}
-                    formId="name"
-                    {...commonFormProps}
-                  />
-                  )}
-                  {isBlockVisible(country) && (
-                  <Country
-                    country={country}
-                    visibilityCountry={visibilityCountry}
-                    formId="country"
-                    {...commonFormProps}
-                  />
-                  )}
-                  {isBlockVisible((languageProficiencies || []).length) && (
-                  <PreferredLanguage
-                    languageProficiencies={languageProficiencies || []}
-                    visibilityLanguageProficiencies={visibilityLanguageProficiencies}
-                    formId="languageProficiencies"
-                    {...commonFormProps}
-                  />
-                  )}
-                  {isBlockVisible(levelOfEducation) && (
-                  <Education
-                    levelOfEducation={levelOfEducation}
-                    visibilityLevelOfEducation={visibilityLevelOfEducation}
-                    formId="levelOfEducation"
-                    {...commonFormProps}
-                  />
-                  )}
+                  <div className="profile-page__rail-directory">
+                    {isBlockVisible(name) && (
+                      <div className="profile-page__rail-field">
+                        <Name
+                          name={name}
+                          accountSettingsUrl={context.config.ACCOUNT_SETTINGS_URL}
+                          visibilityName={visibilityName}
+                          formId="name"
+                          {...commonFormProps}
+                        />
+                      </div>
+                    )}
+                    {isBlockVisible(country) && (
+                      <div className="profile-page__rail-field">
+                        <Country
+                          country={country}
+                          visibilityCountry={visibilityCountry}
+                          formId="country"
+                          {...commonFormProps}
+                        />
+                      </div>
+                    )}
+                    {isBlockVisible((languageProficiencies || []).length) && (
+                      <div className="profile-page__rail-field">
+                        <PreferredLanguage
+                          languageProficiencies={languageProficiencies || []}
+                          visibilityLanguageProficiencies={visibilityLanguageProficiencies}
+                          formId="languageProficiencies"
+                          {...commonFormProps}
+                        />
+                      </div>
+                    )}
+                    {isBlockVisible(levelOfEducation) && (
+                      <div className="profile-page__rail-field">
+                        <Education
+                          levelOfEducation={levelOfEducation}
+                          visibilityLevelOfEducation={visibilityLevelOfEducation}
+                          formId="levelOfEducation"
+                          {...commonFormProps}
+                        />
+                      </div>
+                    )}
+                    {isBlockVisible((socialLinks || []).some((link) => link?.socialLink !== null)) && (
+                      <div className="profile-page__rail-field">
+                        <p className="profile-page__rail-group-title">
+                          <FormattedMessage
+                            id="profile.rail.social.title"
+                            defaultMessage="Social links"
+                            description="Title for social links group in profile rail"
+                          />
+                        </p>
+                        <SocialLinks
+                          socialLinks={socialLinks || []}
+                          draftSocialLinksByPlatform={draftSocialLinksByPlatform || {}}
+                          visibilitySocialLinks={visibilitySocialLinks}
+                          formId="socialLinks"
+                          {...commonFormProps}
+                        />
+                      </div>
+                    )}
+                    <AdditionalProfileFieldsSlot />
+                  </div>
+                </section>
+              </aside>
 
-                  <AdditionalProfileFieldsSlot />
-                </div>
-                <div
-                  className={classNames([
-                    'col m-0 pr-0',
-                    isMobileView ? 'pl-0 col-12' : 'pl-40px col-6',
-                  ])}
-                >
-                  {isBlockVisible(bio) && (
-                  <Bio
-                    bio={bio}
-                    visibilityBio={visibilityBio}
-                    formId="bio"
-                    {...commonFormProps}
-                  />
-                  )}
+              <main className="profile-page__main">
+                <section className="profile-page__section-card profile-page__section-card--biography">
+                  <div className="profile-page__section-header">
+                    <div>
+                      <p className="profile-page__section-kicker">
+                        <FormattedMessage
+                          id="profile.section.bio.kicker"
+                          defaultMessage="Biography"
+                          description="Kicker for biography section"
+                        />
+                      </p>
+                      <h2 className="profile-page__section-title">
+                        <FormattedMessage
+                          id="profile.section.bio.title"
+                          defaultMessage="Your journey"
+                          description="Title for biography section"
+                        />
+                      </h2>
+                    </div>
+                  </div>
+                  <div className="profile-page__feature-card">
+                    {isBlockVisible(bio) && (
+                      <div className="profile-page__feature-card-body">
+                        <Bio
+                          bio={bio}
+                          visibilityBio={visibilityBio}
+                          formId="bio"
+                          {...commonFormProps}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </section>
 
-                  {isBlockVisible((socialLinks || []).some((link) => link?.socialLink !== null)) && (
-                  <SocialLinks
-                    socialLinks={socialLinks || []}
-                    draftSocialLinksByPlatform={draftSocialLinksByPlatform || {}}
-                    visibilitySocialLinks={visibilitySocialLinks}
-                    formId="socialLinks"
-                    {...commonFormProps}
-                  />
-                  )}
-                </div>
-              </div>
+                {isBlockVisible((courseCertificates || []).length) && (
+                  <section className="profile-page__section-card profile-page__section-card--certificates">
+                    <div className="profile-page__section-header profile-page__section-header--split">
+                      <div>
+                        <p className="profile-page__section-kicker">
+                          <FormattedMessage
+                            id="profile.section.certificates.kicker"
+                            defaultMessage="WutiSkill certificates"
+                            description="Kicker for the certificates section"
+                          />
+                        </p>
+                        <h2 className="profile-page__section-title">
+                          <FormattedMessage
+                            id="profile.section.certificates.title"
+                            defaultMessage="Awards and credentials"
+                            description="Title of the certificates section"
+                          />
+                        </h2>
+                      </div>
+                      {isAuthenticatedUserProfile() && renderViewMyRecordsButton()}
+                    </div>
+                    <Certificates
+                      certificates={courseCertificates || []}
+                      formId="certificates"
+                    />
+                  </section>
+                )}
+              </main>
             </div>
-          </div>
-          <div
-            className={classNames([
-              'col container-fluid d-inline-flex bg-color-grey-FBFAF9 h-100 w-100 align-items-start justify-content-start g-3rem',
-              isMobileView ? 'py-4 px-3' : 'px-120px py-6',
-            ])}
-          >
-            {isBlockVisible((courseCertificates || []).length) && (
-            <Certificates
-              certificates={courseCertificates || []}
-              formId="certificates"
-            />
-            )}
           </div>
         </>
       )}

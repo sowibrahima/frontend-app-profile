@@ -20,15 +20,15 @@ const FormControls = ({
   const isVisibilityEnabled = useIsVisibilityEnabled();
 
   return (
-    <div className="d-flex flex-row-reverse flex-wrap justify-content-end align-items-center">
+    <div className="profile-form-controls d-flex flex-row-reverse flex-wrap justify-content-end align-items-center">
       {isVisibilityEnabled && (
-        <div className="form-group d-flex flex-wrap">
-          <label className="col-form-label" htmlFor={visibilityId}>
+        <div className="profile-form-controls__visibility form-group d-flex flex-wrap">
+          <label className="profile-form-controls__label col-form-label" htmlFor={visibilityId}>
             {intl.formatMessage(messages['profile.formcontrols.who.can.see'])}
           </label>
           <VisibilitySelect
             id={visibilityId}
-            className="d-flex align-items-center"
+            className="profile-form-controls__select d-flex align-items-center"
             type="select"
             name={visibilityId}
             value={visibility}
@@ -36,13 +36,13 @@ const FormControls = ({
           />
         </div>
       )}
-      <div className="row form-group flex-shrink-0 flex-grow-1 m-0 p-0">
-        <div className="pr-2 pl-0 m-0">
+      <div className="profile-form-controls__actions row form-group flex-shrink-0 flex-grow-1 m-0 p-0">
+        <div className="profile-form-controls__cancel pr-2 pl-0 m-0">
           <Button variant="outline-primary" onClick={cancelHandler}>
             {intl.formatMessage(messages['profile.formcontrols.button.cancel'])}
           </Button>
         </div>
-        <div className="p-0 m-0">
+        <div className="profile-form-controls__save p-0 m-0">
           <StatefulButton
             type="submit"
             state={buttonState}

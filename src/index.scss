@@ -1,6 +1,89 @@
 @use "@openedx/paragon/styles/css/core/custom-media-breakpoints" as paragonCustomMediaBreakpoints;
 
 @import "~@edx/frontend-component-header/dist/index";
-@import "~@edx/frontend-component-footer/dist/footer";
 
 @import 'profile/index';
+
+html,
+body,
+#root {
+  min-height: 100dvh;
+}
+
+body {
+  background: #f4f1ea;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+#root > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+[data-testid="browser-router"] {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+main#main {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.wuti-footer {
+  margin-top: auto;
+  z-index: 10;
+  border-top: 1px solid rgba(26, 26, 46, 0.06);
+  background: #f4f1ea;
+}
+
+.wuti-footer__inner {
+  width: min(1400px, calc(100% - 3rem));
+  margin: 0 auto;
+  padding: 0.45rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.wuti-footer__copy,
+.wuti-footer__link {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: rgba(107, 107, 107, 0.9);
+  text-decoration: none;
+}
+
+.wuti-footer__nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.wuti-footer__link:hover {
+  color: #1a1a2e;
+  text-decoration: none;
+}
+
+@media (max-width: 991.98px) {
+  .wuti-footer__inner {
+    width: min(100%, calc(100% - 1.5rem));
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .wuti-footer__nav {
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+  }
+}

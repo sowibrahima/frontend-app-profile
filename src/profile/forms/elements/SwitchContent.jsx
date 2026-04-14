@@ -1,21 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TransitionReplace } from '@openedx/paragon';
-
-const onChildExit = (htmlNode) => {
-  if (htmlNode.contains(document.activeElement)) {
-    const enteringChild = htmlNode.previousSibling || htmlNode.nextSibling;
-
-    if (!enteringChild) {
-      return;
-    }
-
-    const focusableElements = enteringChild.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    if (focusableElements.length) {
-      focusableElements[0].focus();
-    }
-  }
-};
 
 const SwitchContent = ({ expression = null, cases, className = null }) => {
   const getContent = (caseKey) => {
@@ -36,12 +20,9 @@ const SwitchContent = ({ expression = null, cases, className = null }) => {
   };
 
   return (
-    <TransitionReplace
-      className={className}
-      onChildExit={onChildExit}
-    >
+    <div className={className}>
       {getContent(expression)}
-    </TransitionReplace>
+    </div>
   );
 };
 
